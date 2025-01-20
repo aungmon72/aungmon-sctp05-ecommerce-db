@@ -4,6 +4,9 @@ require('dotenv').config();
 
 const pool = require('./database')
 
+const userRoutes = require('./routes/users');
+
+
 // make sure this comes AFTER dotenv config
 const productsRouter = require('./routes/products');
 
@@ -16,6 +19,7 @@ app.use(cors());
 
 // Routes
 app.use('/api/products', productsRouter);
+app.use('/api/users', userRoutes);
 
 // Routes
 app.get('/', (req, res) => {
