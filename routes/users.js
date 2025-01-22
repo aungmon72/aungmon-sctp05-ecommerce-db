@@ -1,104 +1,114 @@
 const express = require('express');
 const router = express.Router();
-
-// POST register a new user
-// router.post('/register', (req, res) => {
-//   res.json({ message: "Register a new user" });
-// });
-
-// POST login a user
-// router.post('/login', (req, res) => {
-//   res.json({ message: "Login a user" });
-// });
-console.log('users.js');
-const   AuthenticateWithJWT = require('../middlewares/authenticateWithJWT');
 const userService = require('../services/userService');
 const jwt = require('jsonwebtoken');
+const AuthenticateWithJWT = require('../middlewares/authenticateWithJWT');
 
-// POST register a new user
 router.post('/register', async (req, res) => {
-  console.log(req.body);
-  try {
-    const {
-      name,
-      email,
-      password,
-      salutation,
-      marketingPreferences,
-      country
-    } = req.body;
+    try {
+        // Register user with the new payload structure
+        const userId = await userService.registerUser(req.body);
 
-    // Register user with the new payload structure
-    const userId = await userService.registerUser({
-      name,
-      email,
-      password,
-      salutation,
-      marketingPreferences,
-      country
-    });
+        res.status(201).json({ message: "User registered successfully", userId });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+})
 
-    res.status(201).json({ message: "User registered successfully", userId });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
-// POST login a user
 router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
+    try {
+        const { email, password } = req.body;
+        const user = await userService.loginUser(email, password);
+        if (user) {
 
-    const user = await userService.loginUser(email, password);
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    
-    res.json({ message: "Login successful", token, user_id: user.id });
-  } catch (error) {
-    res.status(401).json({ message: error.message });
-  }
-});
+            // create the JWT token
+            const token = jwt.sign({
+                userId: user.id
+            }, process.env.JWT_SECRET, {
+                expiresIn: '1h'
+            });
 
-// PUT update user details
-                 
-router.put('/me', AuthenticateWithJWT, async (req, res) => {
-  try {
-    const userId = req.userId; // Extracted from JWT
-    const userDetails = req.body;
+            res.json({
+                'message': 'Logged in successful',
+                token
+            })
 
-    await userService.updateUserDetails(userId, userDetails);
-    res.json({ message: "User details updated successfully" });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
+        } else {
+            throw new Error("Unable to get user");
+        }
+    } catch (e) {
+        console.log(e);
+        res.status(400).json({
+            'message': 'Unable to log in',
+            'error': e.m
+        })
+    }
+})
 
-// DELETE delete user account
-router.delete('/me', AuthenticateWithJWT, async (req, res) => {
-  try {
-    const userId = req.userId; // Extracted from JWT
-
-    await userService.deleteUserAccount(userId);
-    res.json({ message: "User account deleted successfully" });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
-// GET user information using JWT
+// get the details of the current logged-in user from a JWT
 router.get('/me', AuthenticateWithJWT, async (req, res) => {
-  try {
-    const userId = req.userId;
-    const user = await userService.getUserDetailsById(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    try {
+        const user = await userService.getUserDetailsById(req.userId);
+        if (!user) {
+            return res.status(404).json({
+                message: "User is not found"
+            })
+        }
+
+        const {password, ...userWithOutPassword} = user;
+
+        res.json({
+            'user': userWithOutPassword
+        });
+
+
+    } catch (e) {
+        res.status(500).json({
+            message: e.message
+        })
     }
 
-    res.json({ user });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+})
+
+// update the details of the current logged-in user
+router.put('/me', AuthenticateWithJWT, async (req, res) => {
+    try {
+        console.log(req.body);
+        // todo: validate if all the keys in req.body exists
+        if (!req.body.name || !req.body.email || !req.body.salutation || !req.body.marketingPreferences || !req.body.country) {
+            return res.status(401).json({
+                'error':'Invalid payload or missing keys'
+            })
+        }
+        const userId = req.userId;
+        await userService.updateUserDetails(userId, req.body);
+        res.json({
+            'message':'User details updated'
+        })
+        
+
+    } catch (e) {   
+        console.log(e);
+        res.status(500).json({
+            'message':'Internal server error'
+        })
+
+    } 
+})
+
+// delete the current user
+router.delete('/me', AuthenticateWithJWT, async (req, res) => {
+   try {
+     await userService.deleteUserAccount(req.userId);
+     res.json({
+        'message': "User account deleted"
+     })
+   } catch (e) {
+     console.log(e);
+     res.status(500).json({
+        'message':'Internal Server Error'
+     })
+   }
+})
 
 module.exports = router;
-
-

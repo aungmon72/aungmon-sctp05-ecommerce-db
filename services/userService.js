@@ -1,4 +1,4 @@
-const userData = require('../data/userData');
+const userData = require('../data/users');
 const bcrypt = require('bcrypt');
 
 async function registerUser({ name, email, password, salutation, marketingPreferences, country }) {
