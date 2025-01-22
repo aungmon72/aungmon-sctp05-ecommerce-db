@@ -11,6 +11,7 @@ const userRoutes = require('./routes/users');
 const productsRouter = require('./routes/products');
 
 const userRoutes2 = require('./routes/users');
+const checkoutRoutes = require('./routes/checkout');
 
 const app = express();
 
@@ -25,6 +26,9 @@ app.use(cors());
 // Routes
 app.use('/api/products', productsRouter);
 app.use('/api/users', userRoutes);
+
+app.use('/api/cart', cartRoutes);
+app.use('/api/checkout', checkoutRoutes);
 
 
 // Routes
