@@ -45,6 +45,36 @@ router.post('/login', async (req, res) => {
     }
 })
 
+router.post('/logoff', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await userService.loginUser(email, password);
+        if (user) {
+
+            // create the JWT token
+            const token = jwt.sign({
+                userId: user.id
+            }, process.env.JWT_SECRET, {
+                expiresIn: '0h'
+            });
+
+            res.json({
+                'message': 'Logged off successful',
+                token
+            })
+
+        } else {
+            throw new Error("Unable to get user");
+        }
+    } catch (e) {
+        console.log(e);
+        res.status(400).json({
+            'message': 'Unable to log off',
+            'error': e.m
+        })
+    }
+})
+
 // get the details of the current logged-in user from a JWT
 router.get('/me', AuthenticateWithJWT, async (req, res) => {
     try {
