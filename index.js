@@ -27,7 +27,7 @@ app.use(cors());
 app.use('/api/products', productsRouter);
 app.use('/api/users', userRoutes);
 
-app.use('/api/cart', cartRoutes);
+// app.use('/api/cart', cartRoutes);
 app.use('/api/checkout', checkoutRoutes);
 
 

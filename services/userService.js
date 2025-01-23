@@ -1,4 +1,4 @@
-const userData = require('../data/users');
+const userData = require('../data/userData');
 const bcrypt = require('bcrypt');
 
 async function registerUser({ name, email, password, salutation, marketingPreferences, country }) {
@@ -36,6 +36,19 @@ async function loginUser(email, password) {
   return user;
 }
 
+async function getJWT(email, password) {
+  const user = await userData.getUserByEmail(email);
+  if (!user) {
+    throw new Error('Invalid email or password');
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    throw new Error('Invalid email or password');
+  }
+
+  return user;
+}
 async function updateUserDetails(id, userDetails) {
   return await userData.updateUser(id, userDetails);
 }
@@ -53,6 +66,7 @@ module.exports = {
   loginUser,
   updateUserDetails,
   deleteUserAccount,
-  getUserDetailsById
+  getUserDetailsById,
+  getJWT
 };
 

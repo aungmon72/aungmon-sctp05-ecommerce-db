@@ -3,7 +3,8 @@ const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const orderService = require('../services/orderService');
 const checkoutService = require('../services/checkoutService');
-const UserAuth = require('../middleware/UserAuth');
+// const UserAuth = require('../middleware/UserAuth');
+const UserAuth = require('../middlewares/authenticateWithJWT');
 
 router.post('/', UserAuth, async (req, res) => {
     try {

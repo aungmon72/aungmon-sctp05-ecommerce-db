@@ -4,6 +4,11 @@ const userService = require('../services/userService');
 const jwt = require('jsonwebtoken');
 const AuthenticateWithJWT = require('../middlewares/authenticateWithJWT');
 
+let userID = [];
+let userEmail = [];
+let userPassword = [];
+
+
 router.post('/register', async (req, res) => {
     try {
         // Register user with the new payload structure
@@ -19,8 +24,11 @@ router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await userService.loginUser(email, password);
+        console.log(user);
         if (user) {
-
+            userID.push(user.id);
+            userEmail.push(user.email);
+            userPassword.push(user.password);
             // create the JWT token
             const token = jwt.sign({
                 userId: user.id
@@ -43,9 +51,27 @@ router.post('/login', async (req, res) => {
             'error': e.m
         })
     }
+    console.log(userID, userEmail, userPassword);
 })
 
 router.post('/logoff', async (req, res) => {
+
+    function checkInArray(ID, IDArray) {
+        return IDArray.includes(ID);
+    }  //  function checkInArray(ID, IDArray) {
+    function popFromArray(ID, IDArray) {
+        if (checkInArray(ID, IDArray)) {
+          const index = IDArray.indexOf(ID);
+          if (index > -1) {
+            IDArray.splice(index, 1);  // Removes the element at the found index
+            return true;  // ID was removed
+          }
+        }
+        console.log("Not Found");
+        return false;  // ID was not found
+      }  //  function popFromArray(ID, IDArray) {
+      
+
     try {
         const { email, password } = req.body;
         const user = await userService.loginUser(email, password);
@@ -57,6 +83,11 @@ router.post('/logoff', async (req, res) => {
             }, process.env.JWT_SECRET, {
                 expiresIn: '0h'
             });
+            popFromArray(user.id, userID);
+            popFromArray(user.email, userEmail);
+            popFromArray(user.password, userPassword);
+            console.log(userID, userEmail, userPassword);
+                        
 
             res.json({
                 'message': 'Logged off successful',
