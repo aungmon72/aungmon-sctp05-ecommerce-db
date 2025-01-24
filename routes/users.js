@@ -114,6 +114,41 @@ router.post('/logoff', async (req, res) => {
     }
 })
 
+router.post('/password', async (req, res) => {
+    try {
+        const { email, password, passwordNew1, passwordNew2 } = req.body;
+        const user = await userService.passwordChangeUser(email, password, passwordNew1, passwordNew2);
+        console.log(user);
+        if (user) {
+            userID.push(user.id);
+            userEmail.push(user.email);
+            userPassword.push(user.password);
+            userOperations.push("Password");
+            // create the JWT token
+            const token = jwt.sign({
+                userId: user.id
+            }, process.env.JWT_SECRET, {
+                expiresIn: '1h'
+            });
+
+            res.json({
+                'message': 'Logged in successful',
+                token
+            })
+
+        } else {
+            throw new Error("Unable to get user");
+        }
+    } catch (e) {
+        console.log(e);
+        res.status(400).json({
+            'message': 'Unable to log in',
+            'error': e.m
+        })
+    }
+    console.log(userID, userEmail, userPassword, userOperations);
+})
+
 // get the details of the current logged-in user from a JWT
 router.get('/me', AuthenticateWithJWT, async (req, res) => {
     try {

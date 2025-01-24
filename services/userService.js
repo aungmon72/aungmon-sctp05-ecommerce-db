@@ -36,6 +36,20 @@ async function loginUser(email, password) {
   return user;
 }
 
+
+async function passwordChangeUser(email, password, passwordNew1, passwordNew2) {
+  const user = await userData.getUserByEmail(email);
+  if (!user) {
+    throw new Error('Invalid email or password');
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    throw new Error('Invalid email or password');
+  }
+
+  return user;
+}
 async function getJWT(email, password) {
   const user = await userData.getUserByEmail(email);
   if (!user) {
