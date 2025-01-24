@@ -7,6 +7,7 @@ const AuthenticateWithJWT = require('../middlewares/authenticateWithJWT');
 let userID = [];
 let userEmail = [];
 let userPassword = [];
+let userOperations = [];
 
 
 router.post('/register', async (req, res) => {
@@ -29,6 +30,7 @@ router.post('/login', async (req, res) => {
             userID.push(user.id);
             userEmail.push(user.email);
             userPassword.push(user.password);
+            userOperations.push("Login");
             // create the JWT token
             const token = jwt.sign({
                 userId: user.id
@@ -51,7 +53,7 @@ router.post('/login', async (req, res) => {
             'error': e.m
         })
     }
-    console.log(userID, userEmail, userPassword);
+    console.log(userID, userEmail, userPassword, userOperations);
 })
 
 router.post('/logoff', async (req, res) => {
@@ -83,9 +85,15 @@ router.post('/logoff', async (req, res) => {
             }, process.env.JWT_SECRET, {
                 expiresIn: '0h'
             });
-            popFromArray(user.id, userID);
-            popFromArray(user.email, userEmail);
-            popFromArray(user.password, userPassword);
+            // popFromArray(user.id, userID);
+            // popFromArray(user.email, userEmail);
+            // popFromArray(user.password, userPassword);
+            userID.push(user.id);
+            userEmail.push(user.email);
+            userPassword.push(user.password);
+            userOperations.push("Logoff");
+            console.log(userID, userEmail, userPassword, userOperations);
+
             console.log(userID, userEmail, userPassword);
                         
 
@@ -154,7 +162,12 @@ router.put('/me', AuthenticateWithJWT, async (req, res) => {
             'message':'Internal server error'
         })
 
-    } 
+    }
+    userID.push(user.id);
+    userEmail.push(user.email);
+    userPassword.push(user.password);
+    userOperations.push("Password Change");
+    console.log(userID, userEmail, userPassword, userOperations);
 })
 
 // delete the current user
@@ -170,6 +183,11 @@ router.delete('/me', AuthenticateWithJWT, async (req, res) => {
         'message':'Internal Server Error'
      })
    }
+   userID.push(user.id);
+   userEmail.push(user.email);
+   userPassword.push(user.password);
+   userOperations.push("User deleted");
+   console.log(userID, userEmail, userPassword, userOperations);
 })
 
 module.exports = router;
