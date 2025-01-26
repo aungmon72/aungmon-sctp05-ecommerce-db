@@ -23,6 +23,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+
 // Routes
 app.use('/api/products', productsRouter);
 app.use('/api/users', userRoutes);
