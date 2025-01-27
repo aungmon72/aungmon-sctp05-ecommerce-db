@@ -1,3 +1,7 @@
+FRONT END PROJECT is
+
+https://github.com/aungmon72/aungmon-sctp05-react-ecommerceC
+
 To start mysql, in the terminal, type in `mysql -u root`
 
 # Create a new database user

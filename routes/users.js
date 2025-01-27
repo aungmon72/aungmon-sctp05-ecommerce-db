@@ -24,6 +24,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
+        console.log("In user.js  @@  email, password  == ", email, password )
         const user = await userService.loginUser(email, password);
         console.log(user);
         if (user) {
@@ -114,10 +115,14 @@ router.post('/logoff', async (req, res) => {
     }
 })
 
-router.post('/password', async (req, res) => {
+router.post('/password',  async (req, res) => {
     try {
         const { email, password, passwordNew1, passwordNew2 } = req.body;
+        console.log("In users.js @@ req.body  ==  ", req.body)
+        console.log("In users.js @@ email, password  ==  ", email, password)
+        console.log("In users.js @@ passwordNew1, passwordNew2", passwordNew1, passwordNew2)
         const user = await userService.passwordChangeUser(email, password, passwordNew1, passwordNew2);
+
         console.log(user);
         if (user) {
             userID.push(user.id);
@@ -146,13 +151,15 @@ router.post('/password', async (req, res) => {
             'error': e.m
         })
     }
-    console.log(userID, userEmail, userPassword, userOperations);
+    console.log("In users.js  @@  userID, userEmail, userPassword, userOperations  ==  ", userID, userEmail, userPassword, userOperations);
 })
 
 // get the details of the current logged-in user from a JWT
 router.get('/me', AuthenticateWithJWT, async (req, res) => {
+    console.log("req.body  ==  ", req.body);
     try {
         const user = await userService.getUserDetailsById(req.userId);
+        console.log("user  ==  ", user);
         if (!user) {
             return res.status(404).json({
                 message: "User is not found"
@@ -176,15 +183,16 @@ router.get('/me', AuthenticateWithJWT, async (req, res) => {
 
 // update the details of the current logged-in user
 router.put('/me', AuthenticateWithJWT, async (req, res) => {
+    console.log("req.body  ==  ", req.body);
     try {
-        console.log(req.body);
         // todo: validate if all the keys in req.body exists
-        if (!req.body.name || !req.body.email || !req.body.salutation || !req.body.marketingPreferences || !req.body.country) {
+        if (req.body.name && req.body.email && req.body.salutation && req.body.marketingPreferences || !req.body.country) {
             return res.status(401).json({
                 'error':'Invalid payload or missing keys'
             })
         }
-        const userId = req.userId;
+        const userId = req.body.id;
+        console.log(userId);
         await userService.updateUserDetails(userId, req.body);
         res.json({
             'message':'User details updated'
@@ -198,11 +206,11 @@ router.put('/me', AuthenticateWithJWT, async (req, res) => {
         })
 
     }
-    userID.push(user.id);
-    userEmail.push(user.email);
-    userPassword.push(user.password);
-    userOperations.push("Password Change");
-    console.log(userID, userEmail, userPassword, userOperations);
+    // userID.push(user.id);
+    // userEmail.push(user.email);
+    // userPassword.push(user.password);
+    // userOperations.push("Password Change");
+    // console.log(userID, userEmail, userPassword, userOperations);
 })
 
 // delete the current user
@@ -218,11 +226,11 @@ router.delete('/me', AuthenticateWithJWT, async (req, res) => {
         'message':'Internal Server Error'
      })
    }
-   userID.push(user.id);
-   userEmail.push(user.email);
-   userPassword.push(user.password);
-   userOperations.push("User deleted");
-   console.log(userID, userEmail, userPassword, userOperations);
+//    userID.push(user.id);
+//    userEmail.push(user.email);
+//    userPassword.push(user.password);
+//    userOperations.push("User deleted");
+//    console.log(userID, userEmail, userPassword, userOperations);
 })
 
 module.exports = router;

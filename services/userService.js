@@ -39,6 +39,9 @@ async function loginUser(email, password) {
 
 async function passwordChangeUser(email, password, passwordNew1, passwordNew2) {
   const user = await userData.getUserByEmail(email);
+  console.log("user  ==  ", user)
+  console.log("In userService.js @@ email, password, passwordNew1, passwordNew2 ==  ", email, password, passwordNew1, passwordNew2 )
+
   if (!user) {
     throw new Error('Invalid email or password');
   }
@@ -48,8 +51,9 @@ async function passwordChangeUser(email, password, passwordNew1, passwordNew2) {
     throw new Error('Invalid email or password');
   }
 
-  return user;
+  return await userData.passwordChangeUser(email, password, passwordNew1, passwordNew2);
 }
+
 async function getJWT(email, password) {
   const user = await userData.getUserByEmail(email);
   if (!user) {
@@ -81,6 +85,7 @@ module.exports = {
   updateUserDetails,
   deleteUserAccount,
   getUserDetailsById,
+  passwordChangeUser,
   getJWT
 };
 

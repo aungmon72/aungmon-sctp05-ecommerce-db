@@ -126,6 +126,59 @@ async function updateUser(id, { name, email, salutation, country, marketingPrefe
     }
 }
 
+async function passwordChangeUser(  email, password, passwordNew1, passwordNew2 ) {
+    // if (!email || typeof email !== 'number') {
+    //     throw new Error('Invalid email address');
+    // }
+    console.log("in userData.js @@ email, password, passwordNew1, passwordNew2 ==  ", email, password, passwordNew1, passwordNew2 )
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+        const passwordChangeSQL = `UPDATE users SET password = ${passwordNew1} WHERE email = ${email}`;
+        //  const passwordChangeSQL = `UPDATE users SET password = ? WHERE email = ?`,[passwordNew1, email];
+        console.log("passwordChangeSQL  ==  ", passwordChangeSQL)
+        // Update user password
+        console.log([passwordNew1, email])
+        await connection.query(
+            //  `UPDATE users SET password = ${passwordNew1} WHERE email = ${email}`
+            `UPDATE users SET password = ? WHERE email = ?`, [passwordNew1, email] 
+        );
+        
+        // await connection.query(
+        //     `UPDATE users SET password = ? WHERE email = ?`,
+        //     [  passwordNew1, email]
+        // );
+
+        // Update marketing preferences by deleting existing ones and inserting new ones
+        // await connection.query(`DELETE FROM user_marketing_preferences WHERE user_id = ?`, [id]);
+        // if (Array.isArray(marketingPreferences)) {
+        //     for (const preference of marketingPreferences) {
+        //         const [preferenceResult] = await connection.query(
+        //             `SELECT id FROM marketing_preferences WHERE preference = ?`,
+        //             [preference]
+        //         );
+
+        //         if (preferenceResult.length === 0) {
+        //             throw new Error(`Invalid marketing preference: ${preference}`);
+        //         }
+
+        //         const preferenceId = preferenceResult[0].id;
+        //         await connection.query(
+        //             `INSERT INTO user_marketing_preferences (user_id, preference_id) VALUES (?, ?)`,
+        //             [id, preferenceId]
+        //         );
+        //     }
+        // }
+
+        await connection.commit();
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
+}
+
 async function deleteUser(id) {
     if (!id || typeof id !== 'number') {
         throw new Error('Invalid user ID');
@@ -155,7 +208,8 @@ module.exports = {
     getUserById,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    passwordChangeUser
 };
 
 
